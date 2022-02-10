@@ -1,12 +1,10 @@
 import pygame
 from queue import PriorityQueue
 
-WIDTH = 800
+WIDTH = 700
+ROWS = 50
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption('A* Path Finding Algorithm')
-#logo = pygame.image.load("a_star.jpg")
-#pygame.display.set_icon(logo)
-
 
 
 RED = (255, 0, 0)
@@ -14,8 +12,8 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)  
-PURPLE = (128, 0, 128)  
+BLACK = (0, 0, 0)
+PURPLE = (128, 0, 128)
 ORANGE = (255, 165, 0)
 GREY = (128, 128, 128)
 TURQUOISE = (64, 224, 208)
@@ -90,6 +88,7 @@ class Node:
     def __lt__(self, other):
         return True
 
+
 def h_manhattan(p1, p2):
     x1, y1 = p1
     x2, y2 = p2
@@ -137,6 +136,7 @@ def get_clicked_pos(pos, rows, width):
 
 
 def solve(start, end, h, grid, draw):
+    count = 0
     open_set = PriorityQueue()
     open_set_hash = {start}
 
@@ -147,10 +147,10 @@ def solve(start, end, h, grid, draw):
     f_score = {node: float('inf') for row in grid for node in row}
     f_score[start] = h(start.get_pos(), end.get_pos())
 
-    open_set.put((f_score[start], start))
+    open_set.put((f_score[start], count, start))
 
     while not open_set.empty():
-        current = open_set.get()[1]
+        current = open_set.get()[2]
         if not current.is_start() and not current.is_end():
             current.make_closed()
 
@@ -167,7 +167,8 @@ def solve(start, end, h, grid, draw):
                     h(neighbor.get_pos(), end.get_pos())
 
                 if neighbor not in open_set_hash:
-                    open_set.put((f_score[neighbor], neighbor))
+                    count += 1
+                    open_set.put((f_score[neighbor], count, neighbor))
                     open_set_hash.add(neighbor)
                     if not neighbor.is_end():
                         neighbor.make_visited()
@@ -190,8 +191,6 @@ def reconstruct_path(came_from, end, draw):
 
 
 def main(win, width):
-    ROWS = 50
-
     grid = make_grid(ROWS, width)
 
     start = None
